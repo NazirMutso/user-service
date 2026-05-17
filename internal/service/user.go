@@ -15,6 +15,9 @@ func NewUserService(repo domain.Storage) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, id, name string, age int) error {
+	if len(id) == 0 || len(name) == 0 || age < 1 || age > 120 {
+		return fmt.Errorf("CreateUser: %w", domain.ErrInvalid)
+	}
 	u := domain.User{
 		ID:   id,
 		Name: name,

@@ -28,6 +28,26 @@ var (
 		Name: "Chuck",
 		Age:  68,
 	}
+	user_empty_id = domain.User{
+		ID:   "",
+		Name: "Dominick",
+		Age:  1,
+	}
+	user_empty_name = domain.User{
+		ID:   "user_4",
+		Name: "",
+		Age:  2,
+	}
+	user_zero_age = domain.User{
+		ID:   "user_5",
+		Name: "Emma",
+		Age:  0,
+	}
+	user_old_age = domain.User{
+		ID:   "user_6",
+		Name: "Garry",
+		Age:  122,
+	}
 )
 
 func TestCreateUser(t *testing.T) {
@@ -50,18 +70,39 @@ func TestCreateUser(t *testing.T) {
 			wantErr:  nil,
 		},
 		{
-			testName: "Success creation",
-			id:       user_2.ID,
-			name:     user_2.Name,
-			age:      user_2.Age,
-			wantErr:  nil,
-		},
-		{
 			testName: "Error: duplicate id",
 			id:       user_1.ID,
 			name:     user_1.Name,
 			age:      user_1.Age,
 			wantErr:  domain.ErrDuplicate,
+		},
+		{
+			testName: "Error: invalid user data: empty id",
+			id:       user_empty_id.ID,
+			name:     user_empty_id.Name,
+			age:      user_empty_id.Age,
+			wantErr:  domain.ErrInvalid,
+		},
+		{
+			testName: "Error: invalid user data: empty name",
+			id:       user_empty_name.ID,
+			name:     user_empty_name.Name,
+			age:      user_empty_name.Age,
+			wantErr:  domain.ErrInvalid,
+		},
+		{
+			testName: "Error: invalid user data: zero age",
+			id:       user_zero_age.ID,
+			name:     user_zero_age.Name,
+			age:      user_zero_age.Age,
+			wantErr:  domain.ErrInvalid,
+		},
+		{
+			testName: "Error: invalid user data: too old",
+			id:       user_old_age.ID,
+			name:     user_old_age.Name,
+			age:      user_old_age.Age,
+			wantErr:  domain.ErrInvalid,
 		},
 	}
 
