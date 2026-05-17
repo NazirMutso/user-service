@@ -125,19 +125,18 @@ func TestGetUser(t *testing.T) {
 	tests := []struct {
 		testName string
 		id       string
-		wantUsr  *domain.User
+		wantUsr  domain.User
 		wantErr  error
 	}{
 		{
 			testName: "Success adding",
 			id:       user_1.ID,
-			wantUsr:  &user_1,
+			wantUsr:  user_1,
 			wantErr:  nil,
 		},
 		{
 			testName: "Error: user not found",
 			id:       user_2.ID,
-			wantUsr:  nil,
 			wantErr:  domain.ErrNotFound,
 		},
 	}
@@ -150,7 +149,7 @@ func TestGetUser(t *testing.T) {
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("GetUser() err = %v, wantErr = %v", err, tt.wantErr)
 			}
-			if user != nil && *user != *tt.wantUsr {
+			if user != tt.wantUsr {
 				t.Errorf("GetUser() user = %v, wantUsr = %v", user, tt.wantUsr)
 			}
 		})
@@ -181,11 +180,10 @@ func TestListByAgeRange(t *testing.T) {
 			wantErr:  nil,
 		},
 		{
-			testName: "Error: user not found",
+			testName: "Empty result",
 			min:      0,
 			max:      0,
-			wantRes:  nil,
-			wantErr:  domain.ErrNotFound,
+			wantErr:  nil,
 		},
 	}
 

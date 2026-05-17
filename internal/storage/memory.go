@@ -8,6 +8,9 @@ import (
 	"user-service/internal/domain"
 )
 
+// Compile-time interface check
+var _ domain.Storage = (*InMemoryStorage)(nil)
+
 type InMemoryStorage struct {
 	mu   sync.RWMutex
 	data map[string]domain.User
@@ -35,10 +38,11 @@ func (s *InMemoryStorage) Create(ctx context.Context, u domain.User) error {
 	return nil
 }
 
-func (s *InMemoryStorage) GetByID(ctx context.Context, id string) (*domain.User, error) {
+func (s *InMemoryStorage) GetByID(ctx context.Context, id string) (domain.User, error) {
+	var user domain.User
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return user, ctx.Err()
 	default:
 	}
 	s.mu.RLock()
@@ -46,35 +50,35 @@ func (s *InMemoryStorage) GetByID(ctx context.Context, id string) (*domain.User,
 
 	val, ok := s.data[id]
 	if !ok {
-		return nil, domain.ErrNotFound
+		return user, domain.ErrNotFound
 	}
-	return &val, nil
+	return val, nil
 }
 
-func (s *InMemoryStorage) ListByAgeRange(ctx context.Context, min, max int) ([]domain.User, error) {
+func (s *InMemoryStorage) ListByAgeRange(ctx context.Context, min, max int) (usr []domain.User, err error) {
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return usr, ctx.Err()
 	default:
 	}
 
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	result := make([]domain.User, 0, len(s.data))
+	usr = make([]domain.User, 0, len(s.data))
 	for _, v := range s.data {
 		if v.Age >= min && v.Age <= max {
-			result = append(result, v)
+			usr = append(usr, v)
 		}
 	}
 
-	if len(result) == 0 {
-		return nil, domain.ErrNotFound
+	if len(usr) == 0 {
+		return usr, nil
 	}
 
-	slices.SortFunc(result, func(a, b domain.User) int {
+	slices.SortFunc(usr, func(a, b domain.User) int {
 		return cmp.Compare(a.Age, b.Age)
 	})
 
-	return result, nil
+	return usr, nil
 }
